@@ -1,5 +1,6 @@
 const Queue = require('rethinkdb-job-queue')
 const axios = require('axios')
+const jsonformat=require('json-format')
 const _ = require('lodash');
 const qOptions = {
     name: 'Metalsmith'
@@ -702,6 +703,14 @@ function getJobs() {
                     console.log(e)
                 })
             if (check != false) {
+              // console.log('####################################',rawConfigs[0].repoSettings[0].BaseURL + '/public/log.md')
+              await axios.post(config.baseURL + '/save-menu', {
+                  filename: rawConfigs[0].repoSettings[0].BaseURL + '/public/log.md' ,
+                  text:'# Welcome to Log File!\n'+JSON.stringify(job.log, null, 4),
+                  type: 'file'
+              }).catch((e) => {
+                  console.log(e)
+              })
               await commitProject(job.websitejobqueuedata.RepojsonData);
             } 
             return next()
@@ -809,7 +818,7 @@ async function commitProject(commitForm) {
             // this.$store.state.currentIndex = 0;
 
             // Push repository changes
-            axios.post(config.baseURL + '/gitlab-add-repo', {
+            await axios.post(config.baseURL + '/gitlab-add-repo', {
                 branchName: branchName,
                 commitMessage: commitMessage,
                 repoName: commitForm.id,
@@ -888,7 +897,7 @@ async function commitProject(commitForm) {
                 // this.$store.state.currentIndex = 0;
 
                 // Push repository changes
-                axios.post(config.baseURL + '/gitlab-add-repo', {
+                await axios.post(config.baseURL + '/gitlab-add-repo', {
                     branchName: branchName,
                     commitMessage: commitMessage,
                     repoName: commitForm.id,
